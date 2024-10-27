@@ -6,11 +6,12 @@ use App\Enums\CompanyTypeEnum;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Tests\Feature\Trait\Auth;
 use Tests\TestCase;
 
 class VehicleControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, Auth;
 
     private array $companyData = [
         "name" => "Test Company",
@@ -38,15 +39,17 @@ class VehicleControllerTest extends TestCase
         return $company->json("data");
     }
 
-    public function test_get_all_vehicles()
+    public function test_get_all_vehicles(): void
     {
+        $this->authenticateUser();
         $response = $this->getJson("/api/v1/vehicles");
 
         $response->assertStatus(ResponseAlias::HTTP_OK);
     }
 
-    public function test_create_a_new_vehicle()
+    public function test_create_a_new_vehicle(): void
     {
+        $this->authenticateUser();
         $company = $this->createCompany();
 
         $this->vehicleData["company_id"] = $company["id"];
@@ -56,8 +59,10 @@ class VehicleControllerTest extends TestCase
         $this->assertDatabaseHas("vehicles", $this->vehicleData);
     }
 
-    public function test_get_single_vehicle()
+    public function test_get_single_vehicle(): void
     {
+        $this->authenticateUser();
+
         $company = $this->createCompany();
 
         $this->vehicleData["company_id"] = $company["id"];
@@ -69,8 +74,10 @@ class VehicleControllerTest extends TestCase
         $response->assertStatus(ResponseAlias::HTTP_OK);
     }
 
-    public function test_update_a_vehicle()
+    public function test_update_a_vehicle(): void
     {
+        $this->authenticateUser();
+
         $company = $this->createCompany();
 
         $this->vehicleData["company_id"] = $company["id"];
@@ -84,8 +91,10 @@ class VehicleControllerTest extends TestCase
         $this->assertDatabaseHas("vehicles", array_merge($this->vehicleData, $update));
     }
 
-    public function test_delete_a_vehicle()
+    public function test_delete_a_vehicle(): void
     {
+        $this->authenticateUser();
+
         $company = $this->createCompany();
 
         $this->vehicleData["company_id"] = $company["id"];

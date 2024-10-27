@@ -39,7 +39,7 @@ class CompanyController extends Controller
             return $query->paginate($request->per_page ?? 10);
         });
 
-        if ($request->query('vehicles') === "false") {
+        if ($request->has('vehicles') && $request->query('vehicles') === "false") {
             return CompanyResource::collection($companies)->additional([
                 'success' => true,
                 'message' => "Companies retrieved successfully."
