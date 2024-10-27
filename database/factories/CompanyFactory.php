@@ -18,13 +18,13 @@ class CompanyFactory extends Factory
     public function definition(): array
     {
         return [
-            "name" => fake()->name,
+            "name" => fake()->company,
             "address" => fake()->address,
             "phone" => fake()->phoneNumber,
             "type" => fake()->randomElement(CompanyTypeEnum::cases()),
             "contact_person" => fake()->name,
-            "email" => fake()->unique()->safeEmail(),
-            "website" => fake()->unique()->domainName()
+            "email" => fake()->unique()->companyEmail,
+            "website" => "https://" . fake()->unique()->domainName()
         ];
     }
 }

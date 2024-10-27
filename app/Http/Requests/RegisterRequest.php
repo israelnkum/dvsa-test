@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RegisterCandidateRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     use PasswordValidationRules;
 
@@ -28,10 +28,6 @@ class RegisterCandidateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'device_name' => 'required|string|max:20',
             'email' => [
                 'required',
                 'string',
@@ -39,7 +35,7 @@ class RegisterCandidateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class),
             ],
-            'password' => $this->passwordRules(),
+//            'password' => $this->passwordRules(),
         ];
     }
 }

@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vehicles', function (Blueprint $table) {
+        Schema::create('vehicles', static function (Blueprint $table) {
             $table->id();
-            $table->integer('company_id');
-            $table->foreign('company_id')->references('id')->on('companies');
+            $table->foreignId('company_id')->index()->constrained('companies')->cascadeOnDelete();
             $table->string("make");
-            $table->string("model");
+            $table->string("model", 50);
             $table->string("registration_number");
             $table->timestamps();
         });

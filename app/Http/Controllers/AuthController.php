@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserAccountStatus;
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterCandidateRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\AuthResponseResource;
 use App\Models\User;
 use Exception;
@@ -36,7 +37,7 @@ class AuthController
                 'email' => ['The account is inactive. Contact the Admin.'],
             ]);
         }
-        return $this->generateToken($user, $request->device_name);
+        return $this->generateToken($user, 'device');
     }
 
     public function generateToken(User $user, string $device_name): JsonResponse
@@ -44,21 +45,28 @@ class AuthController
         $token = $user->createToken($device_name)->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'user' => new AuthResponseResource($user),
+            "token" => $token,
+            "email" => $user->email
         ]);
     }
 
     /**
-     * @param RegisterCandidateRequest $request
+     * @param RegisterRequest $request
      * @return mixed
      */
-    public function register(RegisterCandidateRequest $request): mixed
+    public function register(RegisterRequest $request): mixed
     {
         return DB::transaction(function () use ($request) {
             try {
 
-//                return $this->generateToken($user, $request->device_name);
+                $user = User::create([
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'status' => UserAccountStatus::ACTIVE->value
+                ]);
+
+                return $this->generateToken($user, 'device');
+
             } catch (Exception $exception) {
                 Log::error('Registration failed: ' . $exception->getMessage());
                 throw new RuntimeException('Something went wrong', 400);

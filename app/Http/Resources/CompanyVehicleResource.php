@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CompanyResource extends JsonResource
+class CompanyVehicleResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -24,7 +24,8 @@ class CompanyResource extends JsonResource
                 "contact_person" => $this->contact_person,
                 "email" => $this->email,
                 "website" => $this->website,
-            ]
+            ],
+            "vehicles" => VehicleResource::collection($this->vehicles)
         ];
     }
 }

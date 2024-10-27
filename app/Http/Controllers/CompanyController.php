@@ -3,32 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
-use App\Http\Controllers\Trait\Logger;
+use App\Http\Controllers\Trait\Helpers;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Http\Resources\CompanyResource;
+use App\Http\Resources\CompanyVehicleResource;
 use App\Models\Company;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use JsonException;
 
 class CompanyController extends Controller
 {
-    use Logger;
+    use Helpers;
 
     /**
      * Display a listing of the resource.
+     * @throws JsonException
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $companies = Company::query();
+        $cacheKey = $this->getCacheKey('companies', $request->all());
 
-        $companies->when($request->type, function ($q) use ($request) {
-            return $q->where('type', $request->type);
+        $companies = Cache::remember($cacheKey, now()->addDay(), static function () use ($request) {
+
+            $query = Company::query();
+
+            $query->when($request->type, function ($q) use ($request) {
+                return $q->where('type', strtoupper($request->type));
+            });
+
+            return $query->paginate($request->per_page ?? 10);
         });
 
-        return CompanyResource::collection($companies->paginate($request->per_page ?? 10));
+        if ($request->query('vehicles') === "false") {
+            return CompanyResource::collection($companies)->additional([
+                'success' => true,
+                'message' => "Companies retrieved successfully."
+            ]);
+        }
+
+        return CompanyVehicleResource::collection($companies)->additional([
+            'success' => true,
+            'message' => "Companies retrieved successfully."
+        ]);
     }
 
 
@@ -48,6 +69,12 @@ class CompanyController extends Controller
         }
     }
 
+    public function getVehicles(Company $company): ApiResponse
+    {
+        return ApiResponse::success(CompanyVehicleResource::make($company));
+    }
+
+
     /**
      * Display the specified resource.
      */
@@ -55,7 +82,6 @@ class CompanyController extends Controller
     {
         return ApiResponse::success(CompanyResource::make($company));
     }
-
 
     /**
      * Update the specified resource in storage.

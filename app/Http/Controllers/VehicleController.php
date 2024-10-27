@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
-use App\Http\Controllers\Trait\Logger;
+use App\Http\Controllers\Trait\Helpers;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Http\Requests\UpdateVehicleRequest;
 use App\Http\Resources\VehicleResource;
@@ -11,17 +11,23 @@ use App\Models\Vehicle;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 
 class VehicleController extends Controller
 {
-    use Logger;
+    use Helpers;
 
     /**
      * Display a listing of the resource.
+     * @throws \JsonException
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $companies = Vehicle::query()->paginate($request->per_page ?? 10);
+        $cacheKey = $this->getCacheKey('vehicles', $request->all());
+
+        $companies = Cache::remember($cacheKey, now()->addDay(), static function () use ($request) {
+            return Vehicle::query()->paginate($request->per_page ?? 10);
+        });
 
         return VehicleResource::collection($companies);
     }
