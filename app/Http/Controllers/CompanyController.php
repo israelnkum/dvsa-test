@@ -26,11 +26,11 @@ class CompanyController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $cacheKey = $this->getCacheKey('companies', $request->all());
+        $cacheKey = $this->getCacheKey("companies", $request->all());
 
         $companies = Cache::remember($cacheKey, now()->addDay(), static function () use ($request) {
             $query = Company::query()
-                ->select('id', 'name', 'type')
+                ->select("id", "name", "type", "type", "address", "contact_person", "email", "website")
                 ->when($request->type && $request->type !== "All", function ($q) use ($request) {
                     return $q->where('type', strtoupper($request->type));
                 });
@@ -71,7 +71,8 @@ class CompanyController extends Controller
 
     public function getVehicles(Company $company): ApiResponse
     {
-        return ApiResponse::success(CompanyVehicleResource::make($company));
+        $data = $company->vehicles;
+        return ApiResponse::success($data);
     }
 
 
