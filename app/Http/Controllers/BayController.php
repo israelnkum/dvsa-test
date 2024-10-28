@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ApiResponse;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -41,10 +43,11 @@ class BayController extends Controller
                 }
             }
 
-            return response()->json($result);
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return response()->json(['message' => $exception->getMessage()], 500);
+            return ApiResponse::success($result);
+        } catch (Exception $exception) {
+            Log::error("Get bay Error:", [$exception]);
+
+            return ApiResponse::error("Something went wrong");
         }
     }
 }

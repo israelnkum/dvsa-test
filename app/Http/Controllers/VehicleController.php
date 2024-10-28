@@ -26,7 +26,16 @@ class VehicleController extends Controller
         $cacheKey = $this->getCacheKey('vehicles', $request->all());
 
         $companies = Cache::remember($cacheKey, now()->addDay(), static function () use ($request) {
-            return Vehicle::query()->paginate($request->per_page ?? 10);
+
+            $query = Vehicle::query();
+
+            $query->when($request->type && $request->type !== "All", function ($q) use ($request) {
+                return $q->whereHas('company', function ($c) use ($request) {
+                    return $c->where('type', strtoupper($request->type));
+                });
+            });
+
+            return $query->paginate($request->per_page ?? 10);
         });
 
         return VehicleResource::collection($companies);

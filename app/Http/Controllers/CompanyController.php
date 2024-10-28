@@ -32,7 +32,7 @@ class CompanyController extends Controller
 
             $query = Company::query();
 
-            $query->when($request->type, function ($q) use ($request) {
+            $query->when($request->type && $request->type !== "All", function ($q) use ($request) {
                 return $q->where('type', strtoupper($request->type));
             });
 
