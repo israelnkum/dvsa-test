@@ -25,7 +25,7 @@ class CompanyVehicleResource extends JsonResource
                 "email" => $this->email,
                 "website" => $this->website,
             ],
-            "vehicles" => VehicleResource::collection($this->vehicles)
+            "vehicles" => VehicleResource::collection($this->whenLoaded('vehicles'))
         ];
     }
 }

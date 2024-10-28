@@ -29,22 +29,22 @@ class CompanyController extends Controller
         $cacheKey = $this->getCacheKey('companies', $request->all());
 
         $companies = Cache::remember($cacheKey, now()->addDay(), static function () use ($request) {
+            $query = Company::query()
+                ->select('id', 'name', 'type')
+                ->when($request->type && $request->type !== "All", function ($q) use ($request) {
+                    return $q->where('type', strtoupper($request->type));
+                });
 
-            $query = Company::query();
-
-            $query->when($request->type && $request->type !== "All", function ($q) use ($request) {
-                return $q->where('type', strtoupper($request->type));
+            $query->when($request->vehicles && $request->vehicles > 0, function ($q) use ($request) {
+                $q->with([
+                    'vehicles' => function ($v) use ($request) {
+                        $v->paginate($request->vehicles);
+                    }
+                ]);
             });
 
             return $query->paginate($request->per_page ?? 10);
         });
-
-        if ($request->has('vehicles') && $request->query('vehicles') === "false") {
-            return CompanyResource::collection($companies)->additional([
-                'success' => true,
-                'message' => "Companies retrieved successfully."
-            ]);
-        }
 
         return CompanyVehicleResource::collection($companies)->additional([
             'success' => true,
