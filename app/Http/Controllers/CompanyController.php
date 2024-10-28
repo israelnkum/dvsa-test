@@ -71,8 +71,9 @@ class CompanyController extends Controller
 
     public function getVehicles(Company $company): ApiResponse
     {
-        $data = $company->vehicles;
-        return ApiResponse::success($data);
+        $company->vehicles;
+
+        return ApiResponse::success(new CompanyVehicleResource($company));
     }
 
 

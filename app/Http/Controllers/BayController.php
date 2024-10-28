@@ -25,16 +25,15 @@ class BayController extends Controller
             $currentBays = [];
             $currentSum = 0;
 
-            foreach ($bayLengths as $i => $iValue) {
+            foreach ($bayLengths as $i => $bay) {
                 $currentBays[] = $i + 1;
-                $currentSum += $iValue;
+                $currentSum += $bay;
 
                 // Check if the current sum is enough for the vehicle
                 if ($currentSum >= $vehicleLength) {
                     $result[] = $currentBays;
                 }
 
-                // Sliding window to adjust the sequence from the left
                 while ($currentSum >= $vehicleLength && count($currentBays) > 1) {
                     $currentSum -= $bayLengths[array_shift($currentBays) - 1];
                     if ($currentSum >= $vehicleLength) {
